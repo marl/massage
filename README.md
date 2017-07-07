@@ -6,6 +6,9 @@ Multitrack Analysis/SynthesiS for Annotation, auGmentation and Evaluation
 
 [![Coverage Status](https://coveralls.io/repos/github/marl/massage/badge.svg?branch=master)](https://coveralls.io/github/marl/massage?branch=master)
 
+[![Documentation Status](https://readthedocs.org/projects/massage/badge/?version=latest)](http://massage.readthedocs.io/en/latest/?badge=latest)
+
+
 
 Pitch
 ============================
