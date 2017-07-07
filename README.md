@@ -2,6 +2,10 @@
 Multitrack Analysis/SynthesiS for Annotation, auGmentation and Evaluation
 
 
+[![Build Status](https://travis-ci.org/marl/massage.svg?branch=master)](https://travis-ci.org/marl/massage)
+
+[![Coverage Status](https://coveralls.io/repos/github/marl/massage/badge.svg?branch=master)](https://coveralls.io/github/marl/massage?branch=master)
+
 
 Pitch
 ============================
