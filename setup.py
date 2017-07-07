@@ -31,9 +31,11 @@ if __name__ == "__main__":
 
         license='MIT',
 
+        dependency_links=['git+ssh://git@github.com/marl/medleydb.git@1.3.1#egg=medleydb-1.3.1'],
+
         install_requires=[
             'six',
-            'medleydb >= 1.2.8',
+            'medleydb >= 1.3.1',
             'numpy >= 1.8.0',
             'scipy >= 0.13.0',
             'librosa >= 0.5.0',
