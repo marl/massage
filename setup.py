@@ -40,7 +40,8 @@ if __name__ == "__main__":
             'scipy >= 0.13.0',
             'librosa >= 0.5.0',
             'vamp >= 1.1.0',
-            'sox >= 1.3.0'
+            'sox >= 1.3.0',
+            'jams >= 0.2.3'
         ],
 
         extras_require={
