@@ -1,16 +1,17 @@
 """Pyin pitch tracker
 """
+import glob
+import jams
 import librosa
 import numpy as np
-import vamp
-import glob
 import os
+import vamp
 from vamp import vampyhost
 
-from massage.core import PitchTracker
+from massage.core import Transcriber
 
 
-class Pyin(PitchTracker):
+class Pyin(Transcriber):
     """probabalistic yin pitch tracker.
 
     Parameters
@@ -40,7 +41,7 @@ class Pyin(PitchTracker):
                  lowampsuppression=0.1):
         """init method
         """
-        PitchTracker.__init__(self)
+        Transcriber.__init__(self)
 
         self.parameters = {
             'threshdistr': threshdistr,
@@ -49,8 +50,8 @@ class Pyin(PitchTracker):
             'lowampsuppression': lowampsuppression
         }
 
-    def pyin(self, y, fs):
-        """Base call to pyin.
+    def run(self, y, fs):
+        """Run pyin on an audio signal y.
 
         Parameters
         ----------
@@ -58,24 +59,32 @@ class Pyin(PitchTracker):
             audio signal
         fs : float
             audio sample rate
+
+        Returns
+        -------
+        jam : JAMS
+            JAMS object with pyin output
         """
         output = vamp.collect(
             y, fs, 'pyin:pyin', output='smoothedpitchtrack',
             parameters=self.parameters
         )
         hop = float(output['vector'][0])
-        pitch = np.array(output['vector'][1])
-        times = np.arange(0, hop*len(pitch), hop)
-        return times, pitch
+        freqs = np.array(output['vector'][1])
+        times = np.arange(0, hop*len(freqs), hop)
+        confidences = np.ones(())
+        jam = jams.JAMS()
+        jam.file_metadata.duration = len(y) / float(fs)
+        ann = jams.Annotation(namespace='pitch_hz', time=0, duration=jam.file_metadata.duration)
+        for time, freq in zip(times, freqs):
+            ann.append(time=time, value=freq, duration=0, confidence=None)
 
-    def run_from_file(self, audio_filepath):
-        """Run pitch tracker on an individual file."""
-        y, fs = librosa.load(audio_filepath, sr=None)
-        return self.pyin(y, fs)
+        jam.annotations.append(ann)
+        return jam
 
-    def run_from_audio(self, y, fs):
-        """Run pitch tracker on an individual file."""
-        return self.pyin(y, fs)
+    @property
+    def tasks(self):
+        return ['pitch']
 
     @classmethod
     def get_id(cls):

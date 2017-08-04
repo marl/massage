@@ -1,14 +1,14 @@
 """Top level imports.
 """
-from . import pitch
+from . import transcriber
 from . import resynth
 from . import remix
 
-from .core import PITCH_TRACKER_REGISTRY
+from .core import TRANSCRIBER_REGISTRY
 from .version import version as __version__
 
 __all__ = [
-    'pitch',
+    'transcriber',
     'remix',
     'resynth',
     'core'
