@@ -86,26 +86,39 @@ class MetaResynthesizer(type):
 class Resynthesizer(six.with_metaclass(MetaResynthesizer)):
     """This class is an interface for all the resynthesizers available in
     massage. Each resynthesizer instance must inherit from it and implement the
-    following methods:
-        - ``run_from_file``
-            This takes an audio filepath and saves the resynthesized output
-        - ``run_from_audio``
-            This takes an audio signal in memory and returns the resynthesizered
-            audio signal.
+    following method:
+        - ``run``
+            This takes an audio signal, an optional JAMS object, and an optional
+            instrument label and returns a resynthesized audio signal and
+            corresponding JAMS object.
     """
     def __init__(self):
         pass
 
-    def run_from_file(self, audio_filepath, output_path, pitch_tracker=None,
-                      times=None, pitch=None):
-        """Run resynthesizer on an individual file."""
-        raise NotImplementedError("This method must contain the implementation "
-                                  "of the resynthesizer for a filepath")
+    def run(self, y, fs, jam=None, instrument_label=None):
+        """Run resynthesizer on an audio singal.
 
-    def run_from_audio(self, y, fs, pitch_tracker=None, times=None, pitch=None):
-        """Run resynthesizer on an individual file."""
+        Parameters
+        ----------
+        y: np.ndarray
+            Audio signal
+        fs : float
+            Audio samplerate
+        jam : JAMS or None, default=None
+            Jams file
+        instrument_label : str or None, default=None
+            Instrument label
+
+        Returns
+        -------
+        y_resynth : np.ndarray
+            Resynthesized audio signal sampled at input fs
+        jam_resynth : JAMS
+            Jams file with corresponding annotation(s)
+
+        """
         raise NotImplementedError("This method must contain the implementation "
-                                  "of the resynthesizer for a filepath")
+                                  "of the resynthesizer")
 
     @classmethod
     def get_id(cls):

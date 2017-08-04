@@ -52,17 +52,25 @@ class TestResynthesizer(unittest.TestCase):
     def setUp(self):
         self.rsyn = core.Resynthesizer()
 
-    def test_run_from_file(self):
-        audio_file = "data/vocal.wav"
-        output_path = "data/vocal_resynth.wav"
-        with self.assertRaises(NotImplementedError):
-            self.rsyn.run_from_file(audio_file, output_path)
-
-    def test_run_from_audio(self):
+    def test_run(self):
         y = np.zeros((1000, 1))
         fs = 44100
         with self.assertRaises(NotImplementedError):
-            self.rsyn.run_from_audio(y, fs)
+            self.rsyn.run(y, fs)
+
+    def test_run_jam(self):
+        y = np.zeros((1000, 1))
+        fs = 44100
+        jam = None
+        with self.assertRaises(NotImplementedError):
+            self.rsyn.run(y, fs, jam=jam)
+
+    def test_run_inst(self):
+        y = np.zeros((1000, 1))
+        fs = 44100
+        inst = 'mayonnaise'
+        with self.assertRaises(NotImplementedError):
+            self.rsyn.run(y, fs, instrument_label=inst)
 
     def test_get_id(self):
         with self.assertRaises(NotImplementedError):
