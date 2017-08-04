@@ -34,6 +34,10 @@ class TestTranscription(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             self.ptr.get_id()
 
+    def test_tasks(self):
+        with self.assertRaises(NotImplementedError):
+            self.ptr.tasks
+
 
 class TestResynthesizerRegistry(unittest.TestCase):
 
