@@ -7,33 +7,28 @@ import numpy as np
 from massage import core
 
 
-class TestPitchTrackerRegistry(unittest.TestCase):
+class TestTranscriptionRegistry(unittest.TestCase):
 
     def test_keys(self):
-        actual = sorted(core.PITCH_TRACKER_REGISTRY.keys())
+        actual = sorted(core.TRANSCRIBER_REGISTRY.keys())
         expected = sorted(['pyin'])
         self.assertEqual(expected, actual)
 
     def test_types(self):
-        for val in core.PITCH_TRACKER_REGISTRY.values():
-            self.assertTrue(issubclass(val, core.PitchTracker))
+        for val in core.TRANSCRIBER_REGISTRY.values():
+            self.assertTrue(issubclass(val, core.Transcriber))
 
 
-class TestPitchTracker(unittest.TestCase):
+class TestTranscription(unittest.TestCase):
 
     def setUp(self):
-        self.ptr = core.PitchTracker()
+        self.ptr = core.Transcriber()
 
-    def test_run_from_file(self):
-        audio_file = "data/vocal.wav"
-        with self.assertRaises(NotImplementedError):
-            self.ptr.run_from_file(audio_file)
-
-    def test_run_from_audio(self):
+    def test_run(self):
         y = np.zeros((1000, 1))
         fs = 44100
         with self.assertRaises(NotImplementedError):
-            self.ptr.run_from_audio(y, fs)
+            self.ptr.run(y, fs)
 
     def test_get_id(self):
         with self.assertRaises(NotImplementedError):

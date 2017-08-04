@@ -4,51 +4,73 @@
 import six
 
 
-PITCH_TRACKER_REGISTRY = {}
+TRANSCRIBER_REGISTRY = {}
+TRANSCRIBER_TASKS = ['pitch', 'notes', 'chords', 'onsets']
 
-
-class MetaPitchTracker(type):
+class MetaTranscriber(type):
     """Meta-class to register the available pitch trackers."""
     def __new__(meta, name, bases, class_dict):
         cls = type.__new__(meta, name, bases, class_dict)
-        # Register classes that inherit from the base class PitchTracker
-        if "PitchTracker" in [base.__name__ for base in bases]:
-            PITCH_TRACKER_REGISTRY[cls.get_id()] = cls
+        # Register classes that inherit from the base class Transcriber
+        if "Transcriber" in [base.__name__ for base in bases]:
+            TRANSCRIBER_REGISTRY[cls.get_id()] = cls
         return cls
 
 
-class PitchTracker(six.with_metaclass(MetaPitchTracker)):
-    """This class is an interface for all the pitch trackers available in
-    massage. Each pitch tracker instance must inherit from it and implement the
+class Transcriber(six.with_metaclass(MetaTranscriber)):
+    """This class is an interface for transcription-like methods available in
+    massage. Transcribers can be, for example, pitch trackers, multif0
+    detection algorithms, or chord estimation algorithms.
+
+    Each transcriber instance must inherit from it and implement the
     following method:
-        - ``run_from_file``
-            This takes an audio filepath and returns the estimated pitch `pitch` 
-            and corresponding time stamps `times`
-        - ``run_from_audio``
-            This takes an audio signal in memory and returns the estimated pitch
-            `pitch` and corresponding time stamps `times`
+        - ``run``
+            This takes an audio signal y and returns a jams file containing
+            the estimated transcription.
     """
     def __init__(self):
         pass
 
-    def run_from_file(self, audio_filepath):
-        """Run pitch tracker on an individual file."""
-        raise NotImplementedError("This method must contain the implementation "
-                                  "of the pitch tracker for a filepath")
+    def run(self, y, fs):
+        """Run transcriber on an audio signal.
 
-    def run_from_audio(self, y, fs):
-        """Run pitch tracker on an individual file."""
+        Paramters
+        ---------
+        y : np.ndarray
+            Audio signal
+        fs : float
+            Audio sample rate in Hz
+
+        Returns
+        -------
+        jam : JAMS
+            A jams file containing the output of the transcription.
+
+        """
         raise NotImplementedError("This method must contain the implementation "
-                                  "of the pitch tracker for a filepath")
+                                  "of the pitch tracker.")
+
+    @property
+    def tasks(self):
+        """Property listing which trascription tasks are computed by this method.
+        All elements of the list must be elements of TRANSCRIBER_TASKS
+
+        Returns
+        -------
+        tasks : list
+            List of tasks contained in jams file.
+        """
+        raise NotImplementedError("This method must return a list of the tasks "
+                                  "that are output by this method.")
 
     @classmethod
     def get_id(cls):
-        """Method to get the id of the pitch tracker"""
+        """Method to get the id of the transcriber"""
         raise NotImplementedError("This method must return a string identifier"
                                   "of the pitch tracker")
 
 
-RESYNTHESIZER_REGISTRY = {} 
+RESYNTHESIZER_REGISTRY = {}
 
 
 class MetaResynthesizer(type):
@@ -74,7 +96,7 @@ class Resynthesizer(six.with_metaclass(MetaResynthesizer)):
     def __init__(self):
         pass
 
-    def run_from_file(self, audio_filepath, output_path, pitch_tracker=None, 
+    def run_from_file(self, audio_filepath, output_path, pitch_tracker=None,
                       times=None, pitch=None):
         """Run resynthesizer on an individual file."""
         raise NotImplementedError("This method must contain the implementation "
@@ -92,7 +114,7 @@ class Resynthesizer(six.with_metaclass(MetaResynthesizer)):
                                   "of the resynthesizer")
 
 
-REMIXER_REGISTRY = {} 
+REMIXER_REGISTRY = {}
 
 
 class MetaRemixer(type):
