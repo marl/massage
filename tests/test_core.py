@@ -43,7 +43,7 @@ class TestResynthesizerRegistry(unittest.TestCase):
 
     def test_keys(self):
         actual = sorted(core.RESYNTHESIZER_REGISTRY.keys())
-        expected = sorted([])
+        expected = sorted(['guitar_strummer'])
         self.assertEqual(expected, actual)
 
     def test_types(self):

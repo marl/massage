@@ -1,4 +1,4 @@
-"""Test for massage.pitch.pyin
+"""Test for massage.transcriber.pyin
 """
 import unittest
 import os

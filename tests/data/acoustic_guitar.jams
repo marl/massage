@@ -1,0 +1,262 @@
+{
+  "file_metadata": {
+    "release": "",
+    "identifiers": {},
+    "title": "",
+    "jams_version": "0.2.2",
+    "duration": 133.92049886621317,
+    "artist": ""
+  },
+  "sandbox": {},
+  "annotations": [
+    {
+      "data": [
+        {
+          "confidence": null,
+          "duration": 1.486077,
+          "value": "N",
+          "time": 0.0
+        },
+        {
+          "confidence": null,
+          "duration": 17.554286,
+          "value": "G#:maj",
+          "time": 1.486077
+        },
+        {
+          "confidence": null,
+          "duration": 3.622313,
+          "value": "C#:maj",
+          "time": 19.040363000000003
+        },
+        {
+          "confidence": null,
+          "duration": 0.5572790000000001,
+          "value": "A#:min7",
+          "time": 22.662676
+        },
+        {
+          "confidence": null,
+          "duration": 0.18576,
+          "value": "C#:maj",
+          "time": 23.219955000000002
+        },
+        {
+          "confidence": null,
+          "duration": 8.730703,
+          "value": "G#:maj",
+          "time": 23.405714
+        },
+        {
+          "confidence": null,
+          "duration": 3.8080730000000003,
+          "value": "C#:maj",
+          "time": 32.136417
+        },
+        {
+          "confidence": null,
+          "duration": 9.195102,
+          "value": "G#:maj",
+          "time": 35.94449
+        },
+        {
+          "confidence": null,
+          "duration": 3.900952,
+          "value": "C#:maj",
+          "time": 45.139592
+        },
+        {
+          "confidence": null,
+          "duration": 9.380862,
+          "value": "G#:maj",
+          "time": 49.040544000000004
+        },
+        {
+          "confidence": null,
+          "duration": 4.086712,
+          "value": "C#:maj",
+          "time": 58.421406000000005
+        },
+        {
+          "confidence": null,
+          "duration": 11.424218000000002,
+          "value": "G#:maj",
+          "time": 62.50811799900001
+        },
+        {
+          "confidence": null,
+          "duration": 0.928798,
+          "value": "C#:maj",
+          "time": 73.932336
+        },
+        {
+          "confidence": null,
+          "duration": 2.3219950000000003,
+          "value": "G#:maj",
+          "time": 74.861134
+        },
+        {
+          "confidence": null,
+          "duration": 0.743039,
+          "value": "C#:maj",
+          "time": 77.18312900000001
+        },
+        {
+          "confidence": null,
+          "duration": 2.3219950000000003,
+          "value": "G#:maj",
+          "time": 77.926168
+        },
+        {
+          "confidence": null,
+          "duration": 0.835918,
+          "value": "C#:maj",
+          "time": 80.248163
+        },
+        {
+          "confidence": null,
+          "duration": 2.043356,
+          "value": "G#:maj",
+          "time": 81.08408200000001
+        },
+        {
+          "confidence": null,
+          "duration": 0.928798,
+          "value": "C#:maj",
+          "time": 83.12743800000001
+        },
+        {
+          "confidence": null,
+          "duration": 2.3219950000000003,
+          "value": "G#:maj",
+          "time": 84.056236
+        },
+        {
+          "confidence": null,
+          "duration": 0.37151900000000004,
+          "value": "C#:maj",
+          "time": 86.378231
+        },
+        {
+          "confidence": null,
+          "duration": 2.4148750000000003,
+          "value": "G#:maj",
+          "time": 86.749751
+        },
+        {
+          "confidence": null,
+          "duration": 0.650159,
+          "value": "C#:maj",
+          "time": 89.16462600000001
+        },
+        {
+          "confidence": null,
+          "duration": 0.278639,
+          "value": "G#:7",
+          "time": 89.814785
+        },
+        {
+          "confidence": null,
+          "duration": 0.09288,
+          "value": "G#:sus4",
+          "time": 90.093424
+        },
+        {
+          "confidence": null,
+          "duration": 0.09288,
+          "value": "G#:7",
+          "time": 90.186304
+        },
+        {
+          "confidence": null,
+          "duration": 2.3219950000000003,
+          "value": "G#:maj",
+          "time": 90.279184
+        },
+        {
+          "confidence": null,
+          "duration": 0.09288,
+          "value": "G#:7",
+          "time": 92.601179
+        },
+        {
+          "confidence": null,
+          "duration": 4.179592,
+          "value": "G#:maj",
+          "time": 92.69405900000001
+        },
+        {
+          "confidence": null,
+          "duration": 1.3003170000000002,
+          "value": "C#:maj",
+          "time": 96.87365100000001
+        },
+        {
+          "confidence": null,
+          "duration": 1.486077,
+          "value": "G#:maj",
+          "time": 98.173968
+        },
+        {
+          "confidence": null,
+          "duration": 0.5572790000000001,
+          "value": "C#:maj",
+          "time": 99.66004500000001
+        },
+        {
+          "confidence": null,
+          "duration": 2.3219950000000003,
+          "value": "G#:maj",
+          "time": 100.217324
+        },
+        {
+          "confidence": null,
+          "duration": 1.207438,
+          "value": "C#:maj",
+          "time": 102.53932
+        },
+        {
+          "confidence": null,
+          "duration": 12.260135999000001,
+          "value": "G#:maj",
+          "time": 103.746757
+        },
+        {
+          "confidence": null,
+          "duration": 0.09288,
+          "value": "G#:7",
+          "time": 116.006893
+        },
+        {
+          "confidence": null,
+          "duration": 14.303492,
+          "value": "G#:maj",
+          "time": 116.09977300000001
+        },
+        {
+          "confidence": null,
+          "duration": 3.529433,
+          "value": "N",
+          "time": 130.403265
+        }
+      ],
+      "annotation_metadata": {
+        "annotator": {},
+        "curator": {
+          "email": "",
+          "name": ""
+        },
+        "annotation_rules": "",
+        "data_source": "program",
+        "version": "d65ffd9.0",
+        "corpus": "",
+        "annotation_tools": "CREMA 0.0.1pre",
+        "validation": ""
+      },
+      "duration": 133.92049886621317,
+      "sandbox": {},
+      "namespace": "chord",
+      "time": 0
+    }
+  ]
+}

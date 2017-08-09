@@ -41,7 +41,8 @@ if __name__ == "__main__":
             'librosa >= 0.5.0',
             'vamp >= 1.1.0',
             'sox >= 1.3.0',
-            'jams >= 0.3.0'
+            'jams >= 0.3.0',
+            'pretty_midi >= 0.2.7'
         ],
 
         extras_require={

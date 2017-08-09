@@ -4,8 +4,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
 
 # Distribution / packaging
 .Python
@@ -90,6 +88,6 @@ ENV/
 .ropeproject
 
 # Tom's special
-/massage/resources/sf2/
 /.idea/
 *.ipynb
+massage/resources/sonify/
