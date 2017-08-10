@@ -19,6 +19,7 @@ addons:
   apt:
     packages:
     - sox
+    - fluidsynth
 
 env:
   - MEDLEYDB_PATH=$HOME/data/MedleyDB_sample VAMP_PATH=$HOME/data/vamp VAMPY_EXTPATH=$VAMP_PATH

@@ -42,6 +42,7 @@ if __name__ == "__main__":
             'vamp >= 1.1.0',
             'sox >= 1.3.0',
             'jams >= 0.3.0',
+            'pyfluidsynth >= 1.2.4',
             'pretty_midi >= 0.2.7'
         ],
 
