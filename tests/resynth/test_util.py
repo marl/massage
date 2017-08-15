@@ -1,7 +1,19 @@
 import pretty_midi
 from unittest import TestCase
 from massage.resynth.util import *
-from . import TEST_VOICING_FILE, TEST_MIDI_FILE
+import mock
+
+import sys
+sys.modules['fluidsynth'] = mock.Mock()
+
+TEST_VOICING_FILE = os.path.join(
+    os.path.dirname(__file__), '../data/chord_voicings.json')
+TEST_MIDI_FILE = os.path.join(
+    os.path.dirname(__file__), '../data/test_midi.mid')
+TEST_PICK_SF_MOCK_Y = os.path.join(
+    os.path.dirname(__file__), '../data/test_pick_sf_mock_y.npz')
+TEST_FPATH = os.path.join(
+    os.path.dirname(__file__), '../data/acoustic_guitar.wav')
 
 
 class TestUtil(TestCase):
@@ -11,6 +23,10 @@ class TestUtil(TestCase):
         avg_mfcc = compute_avg_mfcc(y=y, sr=44100)
         target_mfcc = np.zeros(39)
         self.assertTrue(np.allclose(avg_mfcc, target_mfcc))
+
+    def test_compute_avg_mfcc_fpath(self):
+        avg_mfcc = compute_avg_mfcc(TEST_FPATH)
+        self.assertEqual(avg_mfcc.shape[0], 39)
 
     def test_onset_offset(self):
         fs = 44100
@@ -42,13 +58,25 @@ class TestUtil(TestCase):
         self.assertEqual(np.sum(env), 0)
         self.assertEqual(env.shape, y.shape)
 
-    def test_pick_sf(self):
+    def test_get_energy_envelope_mono(self):
+        y = np.zeros(100000)
+        env = get_energy_envelope(y)
+        self.assertEqual(np.sum(env), 0)
+        self.assertEqual(env.shape, (1,len(y)))
+
+    @mock.patch.object(pretty_midi.PrettyMIDI, 'fluidsynth', autospec=True)
+    def test_pick_sf(self, mock_fluidsynth):
         # synthesis something different with the sf, and try to match
+        mock_y = np.load(TEST_PICK_SF_MOCK_Y)['arr_0']
+        mock_fluidsynth.return_value = mock_y
+
         midi_data = pretty_midi.PrettyMIDI(TEST_MIDI_FILE)
         test_sf_path = os.path.join(
             os.path.dirname(__file__), '../data/28MBGM.sf2')
         fs = 44100
         y = midi_data.fluidsynth(sf2_path=test_sf_path, fs=fs)
+        # np.savez('test_pick_sf_mock_y', y)
+
         sf_path, program = pick_sf(y, fs, 'acoustic guitar')
         sf_base = os.path.basename(sf_path)
         self.assertEqual(program, 25)
@@ -57,10 +85,20 @@ class TestUtil(TestCase):
         # picked out is 'chorium.sf2' as opposed to 28MBGM
         # self.assertEqual('sf_base', '28MBGM.sf2')
 
+    def test_pick_sf2(self):
+        passed = False
+        y = np.zeros(100)
+        fs = 44100
+        try:
+            out = pick_sf(y, fs, 'not a instrument')
+        except ValueError:
+            passed = True
+        self.assertTrue(passed)
+
     def test_amplitude_to_velocity(self):
         energies = [-1, 0, 0.5, 1]
         velocities = amplitude_to_velocity(energies)
-        self.assertListEqual(list(velocities), [60, 80, 100, 120])
+        self.assertListEqual(list(velocities), [60, 90, 105, 120])
 
     def test_midi_to_jams(self):
         midi_data = pretty_midi.PrettyMIDI(TEST_MIDI_FILE)
@@ -81,5 +119,5 @@ class TestUtil(TestCase):
 
     def test_choose_voicing(self):
         voicing_dict = get_all_voicings(TEST_VOICING_FILE)
-        voicing = choose_voicing('G:maj', voicing_dict, [43, 47, 50, 55, 59])
+        voicing = choose_voicing('A#:maj', voicing_dict, [43, 47, 50, 55, 59])
         self.assertIsNotNone(voicing[0])

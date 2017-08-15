@@ -87,7 +87,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Tom's special
-/.idea/
+.idea/
 *.ipynb
 massage/resources/sonify/
+Local/
+

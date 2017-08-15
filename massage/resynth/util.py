@@ -6,7 +6,7 @@ import jams
 import librosa
 import numpy as np
 import scipy
-from massage.resynth import SF_PATH, ACOUSTIC_SF_MFCC
+from massage import SF_PATH, ACOUSTIC_SF_MFCC
 
 
 def compute_avg_mfcc(fpath=None, y=None, sr=None):
@@ -14,16 +14,16 @@ def compute_avg_mfcc(fpath=None, y=None, sr=None):
 
     Parameters
     ----------
-    fpath: str, optional, default: None
+    fpath : str default=None
         path to an audio file.
-    y: ndarray, optional, default: None
-        array containing the audio signal, has to be mono!
-    sr: float
+    y : ndarray default=None
+        array containing a mono audio signal
+    sr : float
         sample rate
 
     Returns
     -------
-    avg_mfcc: ndarray
+    avg_mfcc : ndarray
         a vector containing the average mfccs over time. discarding the
         first bin.
     """
@@ -40,22 +40,22 @@ def onset_offset(y=None, sr=None, hop_length=512,
 
     Parameters
     ----------
-    y: ndarray, default: None
+    y : ndarray, default=None
         mono signal
-    sr: float, default: None
+    sr : float, default=None
         sample rate
-    hop_length: int, default: 512
+    hop_length : int, default=512
         hop_length associated with feature computation
-    feature: function, default: librosa.feature.melspectrogram
+    feature: function, default=librosa.feature.melspectrogram
         feature function to be used in computing onsets.
 
     Returns
     -------
-    onsets_t: ndarray
+    onsets_t : ndarray
         array of times indicating the detected onsets
-    offsets_t: ndarray
+    offsets_t : ndarray
         array of times indicating the detected offsets
-    onset_strength: ndarray
+    onset_strength : ndarray
         strenth of the onsets
     """
     onsets = librosa.onset.onset_detect(y=y, sr=sr, hop_length=hop_length)
@@ -79,26 +79,26 @@ def compute_envelope(y_input, thresh=0.01, lpf_cutoff=0.03, alpha=20.0,
 
     Parameters
     ----------
-    y_input: ndarray
+    y_input : ndarray
         mono signal
-    thresh: float, default: 0.01
+    thresh : float default=0.01
         threshold for low energy
-    lpf_cutoff: float, default: 0.01
-        smoothing filter on y, in radian
-    alpha: float, default: 20.0
+    lpf_cutoff : float default=0.01
+        smoothing filter on y, in radians
+    alpha : float default=20.0
         Controls the steepness of the envelope via sigmoid
         higher alpha gives a steeper envelope transition
         lower alpha gives a more gradual envelop transition
-    win_length: int, default: 4096
+    win_length : int default=4096
         window size for doing stft analysis
-    theta: float, default: 0.15
+    theta : float default=0.15
         bias on the smoothed signal in the context of logistic function
         higher theta reduces envelope activation sensitivity
         lower theta increases envelope activation sensitivity
 
     Returns
     -------
-    y_env: ndarray
+    y_env : ndarray
         a vector specifying the amplitude envelope
     """
     S = librosa.stft(
@@ -143,11 +143,21 @@ def get_energy_envelope(y):
         energy envelope of the audio signal
     """
     energy_list = []
-    max_amplitudes = np.max(np.abs(y), 1)
-    for ch in range(y.shape[0]):
-        energy_ch = compute_envelope(y[ch, :])
+
+    # treat mono and multi-ch separately
+    max_amplitudes = [np.max(np.abs(y))] if y.ndim == 1 else np.max(np.abs(
+        y), 1)
+    num_ch = 1 if y.ndim == 1 else y.shape[0]
+    for ch in range(num_ch):
+        try:
+            energy_ch = compute_envelope(y[ch, :])
+
+        except IndexError: #mono input
+            energy_ch = compute_envelope(y)
+
         if np.max(energy_ch) > 0.0:
             energy_ch = max_amplitudes[ch] * energy_ch / np.max(energy_ch)
+
         energy_list.append(energy_ch)
     energy_array = np.array(energy_list)
     return energy_array
@@ -159,31 +169,31 @@ def pick_sf(y, sr, instrument):
 
     Parameters
     ----------
-    y: ndarray of float
+    y : ndarray of float
         audio signal, y.shape = num_ch * samples
-    sr: float
+    sr : float
         sampling rate of the audio
     instrument : str
         label of the instrument family. This is supplied to pick which group
-        of mfccs this algorithm will look in.
+        of mfccs this algorithm will look in. Must be one of the following:
+        -'acoustic guitar'
 
     Returns
     -------
-    soundfont_path: str
+    soundfont_path : str
         the path to the sf2 file
-    program: int
+    program : int
         the MIDI program number to use for this specific soundfont
     """
     y_mono = librosa.core.to_mono(y)
     avg_mfcc = compute_avg_mfcc(y=y_mono, sr=sr)
 
-    # add more cases as we develop?
     if 'acoustic guitar' in instrument:
         sf_mfcc = ACOUSTIC_SF_MFCC
     else:
         raise ValueError("invalid instrument {}".format(instrument))
 
-    # SF Matching
+    # sound font Matching
     z_avg = np.mean(sf_mfcc['matrix'], axis=0)
     z_std = np.std(sf_mfcc['matrix'], axis=0)
     z_mat = (sf_mfcc['matrix'] - z_avg) / z_std
@@ -198,13 +208,17 @@ def pick_sf(y, sr, instrument):
     return soundfont_path, program
 
 
-def amplitude_to_velocity(energies):
+def amplitude_to_velocity(energies, max_velo=120, min_velo=60):
     """ Map amplitude values to sensible velocities
 
     Parameters
     ----------
     energies : ndarray of float
         an array of energy values
+    max_velo : int
+        maximun allowed midi velocity value
+    min_velo : int
+        min allowed midi velocity value
 
     Returns
     -------
@@ -212,11 +226,10 @@ def amplitude_to_velocity(energies):
         an array of velocities in the range [60,120]
         The range is chosen to be restricted on purpose
     """
-    velocities = 40.0 * (energies / np.max(energies)) + 80.0
+    v_range = float(max_velo - min_velo)
+    v_mean = np.mean([max_velo, min_velo])
+    velocities = v_range / 2.0 * (energies / np.max(np.abs(energies))) + v_mean
     velocities = np.round(velocities).astype(int)
-    if any(velocities > 120) or any(velocities < 60):
-        velocities[velocities > 120] = 120
-        velocities[velocities < 60] = 60
     return velocities
 
 
@@ -227,12 +240,12 @@ def midi_to_jams(midi_data):
 
     Parameters
     ----------
-    midi_data: PrettyMIDI
+    midi_data : PrettyMIDI
         MIDI data with notes.
 
     Returns
     -------
-    jam: JAMS
+    jam : JAMS
         JAMS objects with notes saved as annotation
     """
     # Get all the note events from the first instrument
@@ -241,6 +254,8 @@ def midi_to_jams(midi_data):
         solo_inst = midi_data.instruments[inst_idx]
         pm_notes = solo_inst.notes  # assuming midi file is single insturment
         inst_dur = solo_inst.get_end_time()
+        if jam.file_metadata.duration is None:
+            jam.file_metadata.duration = 0
         if jam.file_metadata.duration < inst_dur:
             jam.file_metadata.duration = inst_dur
         # Create annotation container for the notes.
@@ -292,7 +307,6 @@ def get_all_voicings(voicing_file):
 
     Parameters
     ----------
-
     voicing_file : str
         path to json file of voicings
 

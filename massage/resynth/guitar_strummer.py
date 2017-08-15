@@ -6,16 +6,17 @@ import numpy as np
 import pretty_midi
 import scipy
 
-import massage.resynth.util as util
+
+from massage.resynth import util
 from massage.core import Resynthesizer
-from massage.resynth import VOICING_FILE
+from massage import VOICING_FILE
 
 
 class GuitarStrummer(Resynthesizer):
-    """ Resynthesize a stereo audio file that simulate a strumming guitar.
-        Takes a guitar stem and associated JAMS object with chord annotation
-        and generate strummed chords according to JAMS chord annotation and
-        onsets detected from Audio File.
+    """ Resynthesize a stereo audio file that simulates a strumming guitar.
+        Takes a guitar stem and associated JAMS object containing a chord
+        annotation and generates strummed chords according to the JAMS chord
+        annotation and onsets detected from the audio signal.
     """
 
     def run(self, y, fs, jam=None, instrument_label=None):
@@ -30,19 +31,25 @@ class GuitarStrummer(Resynthesizer):
         fs : int
             the sample rate of the audio signal y
         jam : JAMS
-            a jams object that contain 'chord' annotation for y
+            a jams object that contains 'chord' annotation for y
         instrument_label : str
-            Label specifying the instrument of the track. Will add more
-                -'acoustic guitar' : Acoustic Guitar
+            Label specifying the instrument of the track. Must be one of:
+                -'acoustic guitar'
         """
+        # input guarding
+        if len(y) == 0:
+            raise ValueError('len(y) is 0!')
 
         # Get Chord annotation
-        time_intervals, chord_labs = jam.search(
-            namespace='chord')[0].to_interval_values()
-
         chord_sequence = []
-        for interval, lab in zip(time_intervals, chord_labs):
-            chord_sequence.append([interval[0], interval[1], lab])
+        try:
+            time_intervals, chord_labs = jam.search(
+                namespace='chord')[0].to_interval_values()
+            for interval, lab in zip(time_intervals, chord_labs):
+                chord_sequence.append([interval[0], interval[1], lab])
+        except IndexError:
+            raise ValueError('no "chord" annotation in the JAMS object.')
+
 
         envelope = util.get_energy_envelope(y)
         y_mono = librosa.core.to_mono(y)
@@ -51,13 +58,13 @@ class GuitarStrummer(Resynthesizer):
         velocities = util.amplitude_to_velocity(energies)
         sound_font, program = util.pick_sf(y_mono, fs, instrument_label)
 
-        # print("soundfont: {} program: {}".format(sound_font, program))
-
         env_times = librosa.samples_to_time(np.arange(len(envelope[0])), sr=fs)
 
-        energy_interp = []
         # list of interp1d objects, len(.) = number of channels
-        for ch in range(envelope.shape[0]):
+        energy_interp = []
+
+        num_ch = 1 if envelope.ndim == 1 else envelope.shape[0]
+        for ch in range(num_ch):
             energy_interp_ch = scipy.interpolate.interp1d(
                 env_times, envelope[0], bounds_error=False,
                 fill_value='extrapolate')
@@ -72,9 +79,6 @@ class GuitarStrummer(Resynthesizer):
 
         # Resynth
         y = midi_data.fluidsynth(sf2_path=sound_font, fs=fs)
-        if len(y) == 0:
-            print("y is none")
-            return
 
         # Normalize
         if np.max(np.abs(y)) > 0:
@@ -94,34 +98,32 @@ class GuitarStrummer(Resynthesizer):
     @classmethod
     def get_id(cls):
         """Method to get the id of the pitch tracker
-
-        Returns
-        -------
-        str : 'guitar_strummer'
         """
         return 'guitar_strummer'
 
     def _get_strum(self, start_t, end_t, chord, voicings, prev_voicing,
-                   backwards=False, velocity=None):
+                   backwards=False, velocity=None, max_strum_duration=2.5):
         """
         Parameters
         ----------
-        start_t: float
+        start_t : float
             starting time of the strum
-        end_t: float
+        end_t : float
             ending time of the strum
-        chord: str
-            'Ab:maj6', 'D#:min', etc
-        voicings: dict
-            {chord_string: list of voicing}
-            voicing is a list of int
-        prev_voicing: list of int
+        chord : str
+            Chord-Harte Format chord labels, 'Ab:maj6', 'D#:min', etc
+        voicings : dict
+            keys are Chorde-Harte chord labels, values are lists of midi
+            notes corresponding to different chord voicings.
+        prev_voicing : list of int
             a list of midi numbers to represent the previous voicing
-        backwards: bool, default = False
+        backwards : bool, default=False
             - False : strumming down
             - True  : strumming up
         velocity : int
             midi velocity value of the strum to be created
+        max_strum_duration : float default=2.5
+            the maximum time in seconds that a strum will be held
 
         Returns
         -------
@@ -136,9 +138,9 @@ class GuitarStrummer(Resynthesizer):
         notes = util.choose_voicing(chord, voicings, prev_voicing)
         strum_duration = end_t - start_t
 
-        if strum_duration > 2.5:
-            end_t = start_t + 2.5
-            strum_duration = 2.5
+        if strum_duration > max_strum_duration:
+            end_t = start_t + max_strum_duration
+            strum_duration = max_strum_duration
 
         current_voicing = notes
         shifted_start = start_t
@@ -184,32 +186,38 @@ class GuitarStrummer(Resynthesizer):
         return strum, current_voicing
 
     def _generate_chord_midi(self, chord_sequence, onsets, offsets, velocities,
-                             program, energy_interp, voicing_file):
+                             program, energy_interp, voicing_file,
+                             onset_lag=0.01, energy_thresh=0.03):
         """ Given list of triples of the form
             (start_time, end_time, chord_name), generate midi file.
 
         Parameters
         ----------
-        chord_sequence: list
+        chord_sequence : list
             list of triples of the form (start_time, end_time, chord_name),
             with start_time, end_time in seconds, and chord names of the
             form 'A:min6', 'Bb:maj', etc
-        onsets: ndarray of float
+        onsets : ndarray of float
             a list of onset times
-        offsets: ndarray of float
-            a lost of offset times
-        velocities: ndarray of int
+        offsets : ndarray of float
+            a list of offset times
+        velocities : ndarray of int
             array of midi velocity values for each chord
-        program: int
-            midi value for program number
-        energy_interp: list of scipy.interpolate.interp1d
-            a list of interpolator object (1 per channel) to facilitate energy
+        program : int
+            midi program number
+        energy_interp : list of scipy.interpolate.interp1d
+            a list of interpolator objects (1 per channel) to facilitate energy
             interpolation
-        voicing_file: str
-            file path to the voicing.json file
+        voicing_file : str
+            Path to a json file containing chord voicings
+        onset_lag : float default=2.5
+            number of secs to move the strum forward in order to compensate
+            for strumming time.
+        energy_thresh : float default=0.03
+            threshold the energy needs to exceed in order to be voiced.
 
         Returns
-        midi_chords: pretty_midi.PrettyMIDI
+        midi_chords : pretty_midi.PrettyMIDI
             pretty_midi object ready to be synthesized
 
         """
@@ -229,8 +237,8 @@ class GuitarStrummer(Resynthesizer):
             onsets_idx_in_range = np.where(
                 np.logical_and(onsets >= start_t, onsets < end_t))[0]
 
-            # shift onset back by 10 ms to adjust for strum start
-            start_times = [onsets[i] - 0.01 for i in onsets_idx_in_range]
+            # shift onset back by onset_lag (sec) to adjust for strum start
+            start_times = [onsets[i] - onset_lag for i in onsets_idx_in_range]
 
             energies = [np.max([energy_interp[0](s), energy_interp[1](s)])
                         for s in start_times]
@@ -245,7 +253,7 @@ class GuitarStrummer(Resynthesizer):
             zipper = zip(start_times, end_times, next_start_times, energies)
 
             for i, (start_t, end_t, next_start_t, energy) in enumerate(zipper):
-                if energy < 0.03:
+                if energy < energy_thresh:
                     continue
 
                 if i % 2 == 0:
