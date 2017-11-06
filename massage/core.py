@@ -95,7 +95,6 @@ class Resynthesizer(six.with_metaclass(MetaResynthesizer)):
     def __init__(self):
         pass
 
-
     def run(self, y, fs, jam=None, instrument_label=None):
         """Run resynthesizer on an audio singal.
 
@@ -116,7 +115,6 @@ class Resynthesizer(six.with_metaclass(MetaResynthesizer)):
             Resynthesized audio signal sampled at input fs
         jam_resynth : JAMS
             Jams file with corresponding annotation(s)
-
         """
         raise NotImplementedError("This method must contain the implementation "
                                   "of the resynthesizer")
