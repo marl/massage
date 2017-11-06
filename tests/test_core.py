@@ -7,6 +7,7 @@ import numpy as np
 from massage import core
 
 
+
 class TestTranscriptionRegistry(unittest.TestCase):
 
     def test_keys(self):

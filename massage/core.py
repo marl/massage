@@ -95,6 +95,7 @@ class Resynthesizer(six.with_metaclass(MetaResynthesizer)):
     def __init__(self):
         pass
 
+
     def run(self, y, fs, jam=None, instrument_label=None):
         """Run resynthesizer on an audio singal.
 
