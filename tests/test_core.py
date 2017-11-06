@@ -7,44 +7,44 @@ import numpy as np
 from massage import core
 
 
-class TestPitchTrackerRegistry(unittest.TestCase):
+
+class TestTranscriptionRegistry(unittest.TestCase):
 
     def test_keys(self):
-        actual = sorted(core.PITCH_TRACKER_REGISTRY.keys())
+        actual = sorted(core.TRANSCRIBER_REGISTRY.keys())
         expected = sorted(['pyin'])
         self.assertEqual(expected, actual)
 
     def test_types(self):
-        for val in core.PITCH_TRACKER_REGISTRY.values():
-            self.assertTrue(issubclass(val, core.PitchTracker))
+        for val in core.TRANSCRIBER_REGISTRY.values():
+            self.assertTrue(issubclass(val, core.Transcriber))
 
 
-class TestPitchTracker(unittest.TestCase):
+class TestTranscription(unittest.TestCase):
 
     def setUp(self):
-        self.ptr = core.PitchTracker()
+        self.ptr = core.Transcriber()
 
-    def test_run_from_file(self):
-        audio_file = "data/vocal.wav"
-        with self.assertRaises(NotImplementedError):
-            self.ptr.run_from_file(audio_file)
-
-    def test_run_from_audio(self):
+    def test_run(self):
         y = np.zeros((1000, 1))
         fs = 44100
         with self.assertRaises(NotImplementedError):
-            self.ptr.run_from_audio(y, fs)
+            self.ptr.run(y, fs)
 
     def test_get_id(self):
         with self.assertRaises(NotImplementedError):
             self.ptr.get_id()
+
+    def test_tasks(self):
+        with self.assertRaises(NotImplementedError):
+            self.ptr.tasks
 
 
 class TestResynthesizerRegistry(unittest.TestCase):
 
     def test_keys(self):
         actual = sorted(core.RESYNTHESIZER_REGISTRY.keys())
-        expected = sorted([])
+        expected = sorted(['guitar_strummer'])
         self.assertEqual(expected, actual)
 
     def test_types(self):
@@ -57,17 +57,25 @@ class TestResynthesizer(unittest.TestCase):
     def setUp(self):
         self.rsyn = core.Resynthesizer()
 
-    def test_run_from_file(self):
-        audio_file = "data/vocal.wav"
-        output_path = "data/vocal_resynth.wav"
-        with self.assertRaises(NotImplementedError):
-            self.rsyn.run_from_file(audio_file, output_path)
-
-    def test_run_from_audio(self):
+    def test_run(self):
         y = np.zeros((1000, 1))
         fs = 44100
         with self.assertRaises(NotImplementedError):
-            self.rsyn.run_from_audio(y, fs)
+            self.rsyn.run(y, fs)
+
+    def test_run_jam(self):
+        y = np.zeros((1000, 1))
+        fs = 44100
+        jam = None
+        with self.assertRaises(NotImplementedError):
+            self.rsyn.run(y, fs, jam=jam)
+
+    def test_run_inst(self):
+        y = np.zeros((1000, 1))
+        fs = 44100
+        inst = 'mayonnaise'
+        with self.assertRaises(NotImplementedError):
+            self.rsyn.run(y, fs, instrument_label=inst)
 
     def test_get_id(self):
         with self.assertRaises(NotImplementedError):

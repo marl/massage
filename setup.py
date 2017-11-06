@@ -31,17 +31,19 @@ if __name__ == "__main__":
 
         license='MIT',
 
-        dependency_links=['git+ssh://git@github.com/marl/medleydb.git@1.3.1#egg=medleydb-1.3.1'],
+        dependency_links=['git+ssh://git@github.com/marl/medleydb.git'],
 
         install_requires=[
             'six',
-            'medleydb >= 1.3.1',
+            'medleydb >= 1.3.3',
             'numpy >= 1.8.0',
             'scipy >= 0.13.0',
-            'librosa >= 0.5.0',
+            'librosa >= 0.5.1',
             'vamp >= 1.1.0',
             'sox >= 1.3.0',
-            'jams >= 0.2.3'
+            'jams >= 0.3.0',
+            'pretty_midi >= 0.2.7',
+            'pyfluidsynth >= 1.2.4'
         ],
 
         extras_require={
